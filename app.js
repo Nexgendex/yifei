@@ -22,9 +22,10 @@ document.addEventListener("DOMContentLoaded", () => {
           }
         } catch (error) {
           console.error("Error connecting to wallet:", error);
+          alert("Error connecting to wallet: " + error.message);
         }
       } else {
-        console.log("MetaMask is not installed!");
+        alert("MetaMask is not installed!");
       }
     });
   }
@@ -40,51 +41,57 @@ document.addEventListener("DOMContentLoaded", () => {
       const factoryAddress = "0x1b0f2c7dd983541775ba5d94ef45b4caf988ab88";
       const factoryABI = [
         {
-          inputs: [
+          "inputs": [
             {
-              internalType: "string",
-              name: "name",
-              type: "string",
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
             },
             {
-              internalType: "string",
-              name: "symbol",
-              type: "string",
+              "internalType": "string",
+              "name": "symbol",
+              "type": "string"
             },
             {
-              internalType: "uint256",
-              name: "initialSupply",
-              type: "uint256",
-            },
+              "internalType": "uint256",
+              "name": "initialSupply",
+              "type": "uint256"
+            }
           ],
-          name: "createToken",
-          outputs: [
+          "name": "createToken",
+          "outputs": [
             {
-              internalType: "address",
-              name: "",
-              type: "address",
-            },
+              "internalType": "address",
+              "name": "",
+              "type": "address"
+            }
           ],
-          stateMutability: "nonpayable",
-          type: "function",
-        },
+          "stateMutability": "nonpayable",
+          "type": "function"
+        }
       ];
+
+      if (!window.ethereum) {
+        alert("Please install MetaMask to interact.");
+        return;
+      }
 
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       const factory = new ethers.Contract(factoryAddress, factoryABI, signer);
       try {
-        const tx = await factory.createToken(
-          tokenName,
-          tokenSymbol,
-          initialSupply
-        );
+        // 转换 initialSupply 为 BigNumber，假设代币使用 18 位小数
+        const initialSupplyFormatted = ethers.utils.parseUnits(initialSupply.toString(), 18);
+        console.log("Formatted Initial Supply: ", initialSupplyFormatted.toString());
+
+        const tx = await factory.createToken(tokenName, tokenSymbol, initialSupplyFormatted);
         await tx.wait();
         alert("Token created successfully!");
       } catch (error) {
         console.error("Failed to create token:", error);
-        alert("Error creating token");
+        alert("Error creating token: " + error.message);
       }
     });
   }
 });
+
